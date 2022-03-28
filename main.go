@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"log"
+	"net/http"
 	"os"
 )
 
@@ -17,18 +19,37 @@ type option struct {
 	Arc  string
 }
 
-func main() {
-	data, err := os.ReadFile("gopher.json")
+func parseJson(filename string) (map[string]chapter, error) {
+	data, err := os.ReadFile(filename)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
 
 	var adventure map[string]chapter
 	if err = json.Unmarshal(data, &adventure); err != nil {
+		return nil, err
+	}
+
+	return adventure, nil
+}
+
+func main() {
+	adventure, err := parseJson("gopher.json")
+	if err != nil {
 		log.Fatalln(err)
 	}
 
-	playChapter(adventure, adventure["intro"])
+	templates := template.Must(template.ParseGlob("tmpl/*"))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		err = templates.ExecuteTemplate(w, "index.html", adventure["intro"])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
+
+	//playChapter(adventure, adventure["intro"])
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 func playChapter(a map[string]chapter, c chapter) {
@@ -61,3 +82,10 @@ func playChapter(a map[string]chapter, c chapter) {
 
 	playChapter(a, a[arc])
 }
+
+//func renderTemplate(w http.ResponseWriter, tmpl string, c chapter) {
+//	err := templates.ExecuteTemplate(w, tmpl+".html", p)
+//	if err != nil {
+//		http.Error(w, err.Error(), http.StatusInternalServerError)
+//	}
+//}
