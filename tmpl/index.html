@@ -11,7 +11,17 @@
 </head>
 <body class="container">
 <h1>{{.Title}}</h1>
-<p>{{.Story}}</p>
+{{ range .Story }}
+<p>{{.}}</p>
+{{end}}
 
+<div style="display: flex; margin-top: 50px">
+{{ range $index, $element := .Options }}
+<div style="display: flex; flex-direction: column; padding: 10px; align-items: center">
+    <p>{{$element.Text}}</p>
+    <button type="button" class="btn btn-primary" style="width: 150px">Go!</button>
+</div>
+{{ end }}
+</div>
 </body>
 </html>
