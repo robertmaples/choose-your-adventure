@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -40,16 +41,34 @@ func main() {
 	}
 
 	templates := template.Must(template.ParseGlob("tmpl/*"))
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		err = templates.ExecuteTemplate(w, "index.html", adventure["intro"])
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	})
+
+	handler := &ChooseAdventureHandler{
+		adventure: adventure,
+		templates: templates,
+	}
+	http.Handle("/", handler)
 
 	//playChapter(adventure, adventure["intro"])
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+type ChooseAdventureHandler struct {
+	adventure map[string]chapter
+	templates *template.Template
+}
+
+func (h *ChooseAdventureHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(body))
+
+	err = h.templates.ExecuteTemplate(w, "index.html", h.adventure["intro"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func playChapter(a map[string]chapter, c chapter) {

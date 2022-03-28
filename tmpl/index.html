@@ -7,6 +7,14 @@
 
     <!--Use bootstrap to make the application look nice-->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <script>
+        function optionSelected(element) {
+            console.log(element.value)
+            const HTTP = new XMLHttpRequest()
+            HTTP.open("POST", ":8080")
+            HTTP.send(element.value)
+        }
+    </script>
     <script async src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 </head>
 <body class="container">
@@ -19,7 +27,7 @@
 {{ range $index, $element := .Options }}
 <div style="display: flex; flex-direction: column; padding: 10px; align-items: center">
     <p>{{$element.Text}}</p>
-    <button type="button" class="btn btn-primary" style="width: 150px">Go!</button>
+        <button type="button" name="option" value="{{$element.Arc}}" class="btn btn-primary" style="width: 150px" onclick="optionSelected(this)">Go!</button>
 </div>
 {{ end }}
 </div>
